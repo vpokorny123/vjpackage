@@ -1,0 +1,82 @@
+---
+title: "Untitled"
+output: html_document
+date: '2022-04-17'
+---
+
+```{r}
+library(fungible)
+library(psych)
+PF16_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/16PF/data_cleaned_rev_scored.csv',data.table = FALSE)
+BIG5_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/BIG5/data_cleaned_rev_scored.csv',data.table = FALSE)
+SD3_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/SD3/data_cleaned_rev_scored.csv',data.table = FALSE)
+MPQ_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/MPQ/data_cleaned_rev_scored.csv',data.table = FALSE)
+PID5_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/PID5/data_cleaned_rev_scored.csv',data.table = FALSE)
+
+```
+
+```{r}
+# now compute all the validity coeffs
+method_names = c("Thurstone","Bartlett","tenBerge","Harman")
+q_name = c("PF16","BIG5","SD3","MPQ","PID5")
+nfactors = c(16,5,3,11,25)
+for (j in seq(1,5)) {
+big_gutt_vals = NULL
+big_vals = NULL
+name = paste0(q_name[j],'_comp_qs_rev')
+res<-faMain(X = get(name), numFactors = nfactors[j], facMethod = 'fapa',rotate = 'promaxQ')
+load(file = paste0(q_name[j],"_weights.RData"))
+FSCoef = as.matrix(get(paste0(q_name[j],"_weights")))
+# just reordering to the factors
+align_res = faAlign(FSCoef,res$loadings, Phi2 =res$Phi )
+res$loadings = align_res$F2 
+res$Phi = align_res$Phi2
+ for (jj in method_names){
+scores<-faScores(X = get(name), Loadings = res$loadings, Phi = res$Phi, Method = jj)
+L <- diag(apply(scores$fscores,2,sd))
+val_coeffs<- diag(t(res$loadings %*% res$Phi) %*% scores$W %*% solve(L))
+score_names = rep(jj,length(val_coeffs))
+big_vals = rbind(big_vals,cbind(score_names,val_coeffs))
+}
+#add in sum scores
+Struct  = res$loadings %*% res$Phi
+ItemCor = cor(get(name))
+C = sqrt(diag(diag(t(FSCoef) %*% ItemCor %*% FSCoef)))
+val_coeffs<-abs(diag(t(Struct) %*% FSCoef %*% solve(C)))
+score_names = rep("Sum",length(val_coeffs))
+big_vals = rbind(big_vals,cbind(score_names,val_coeffs))
+save(big_vals, file = paste0(q_name[j], "_vals.RData"))
+}
+```
+
+```{r}
+# now plot
+pch = 1
+load("factor_names.RData")
+q_name = c("PF16","BIG5","SD3","MPQ","PID5")
+nfactors = c(16,5,3,11,25)
+png(paste0('/Users/pokor076/My Drive/Multivariate/final project/Plots/all_sum_score_FSI.png'),width = 1500, height = 2000, res = 170, pointsize = 15)
+par(mfrow = c(5,1),cex.axis = .8, xpd = TRUE,cex = .7)
+for (j in seq(1,5)) {
+load(paste0(q_name[j],"_vals.RData"))
+plot(x = factor(rep(seq(1,nfactors[j]),5)), y = big_vals[,2] ,col = factor(big_vals[,1]), 
+     pch= pch, 
+     ylab = "Validity Coefficients", xlab = "", ylim = c(0,1), xaxt = "n",cex = 1,lwd = 2)
+
+legtext = unique(big_vals[,1])
+xcoords <- c(0, cumsum( strwidth(legtext, cex = .8))[-length(legtext)])
+secondvector <- (1:length(legtext))-1
+textwidths <- xcoords/secondvector 
+textwidths[1] <- 0 
+legend("topleft",legend = levels(factor(big_vals[,1])), pch = pch,
+      col = factor(levels(factor(big_vals[,1]))),horiz = TRUE,cex = .7,inset = c(0,-.34),pt.cex = 1,text.width=textwidths,pt.lwd = 2)
+title(q_name[j])
+axis(1, at = seq(1, nfactors[j], 1),labels = factor_names[[j]],las = 2,lwd.ticks = 0, pos = .1, lwd = 0)
+
+}
+dev.off()
+```
+
+
+
+

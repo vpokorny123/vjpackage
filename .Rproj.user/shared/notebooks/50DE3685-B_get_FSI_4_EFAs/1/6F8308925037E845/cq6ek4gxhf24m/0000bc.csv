@@ -1,0 +1,3 @@
+"0","res<-faMain(X = get(name), numFactors = nfactors[j], facMethod = 'fapa',rotate = 'promaxQ')
+"
+"0",""

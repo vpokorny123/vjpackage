@@ -1,0 +1,7 @@
+"0","  "
+"0","  ggsave(paste0('Reliabilities_',task,'.png'),"
+"0","         arrangeGrob(cbind(table_row_name,"
+"0","                           lg,"
+"0","                           rg, "
+"0","                           size = ""last"")),"
+"0","         height = 8, width = 8, dpi = 400)"

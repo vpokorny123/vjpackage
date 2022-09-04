@@ -1,0 +1,23 @@
+"0",""
+"0","library(data.table)"
+"2","data.table 1.14.2 using 1 threads (see ?getDTthreads).  Latest news: r-datatable.com
+"
+"2","**********
+This installation of data.table has not detected OpenMP support. It should still work but in single-threaded mode.
+This is a Mac. Please read https://mac.r-project.org/openmp/. Please engage with Apple and ask them for support. Check r-datatable.com for updates, and our Mac instructions here: https://github.com/Rdatatable/data.table/wiki/Installation. After several years of many reports of installation problems on Mac, it's time to gingerly point out that there have been no similar problems on Windows or Linux.
+**********
+"
+"0","user_path <- '/Volumes/GoogleDrive/My Drive/NF-ODSS Behavior Revision/'"
+"0","odss_data<-as.data.frame(fread(paste0(user_path,'paper_data.csv')))"
+"0",""
+"0","#get rid of outlier"
+"0","odss_data <- odss_data[!abs(scale(odss_data$target))>5,]"
+"0","symptoms<-as.data.frame(fread(paste0(user_path,'R scripts/victor_1_24_22.csv')))"
+"0","symptoms$ID <- symptoms$subject_number"
+"0","# merge those mfs"
+"0","merged_data = merge(odss_data, symptoms, by = ""ID"")"
+"0","#get rid of 999s and 888s"
+"0","merged_data[merged_data == ""888"" | merged_data == ""999""] <- NA"
+"0",""
+"0","# need to figure out why 10408200 is missing, but for now we'll just exclude"
+"0","merged_data"

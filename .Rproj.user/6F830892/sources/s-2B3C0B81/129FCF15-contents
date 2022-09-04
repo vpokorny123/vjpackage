@@ -1,0 +1,181 @@
+---
+title: "Untitled"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+library(data.table)
+odss_data<-as.data.frame(fread('/Users/pokor076/My Drive/NF-ODSS Behavior Revision/paper_data.csv'))
+
+#get rid of outlier
+#odss_data <- odss_data[!abs(scale(odss_data$target))>5,]
+
+#just grab important stuff
+vars_i_want <- c("grp","Age","IQ","Gender","LogMAR","BPRS Total","SGI Total", "SPQ Total","M","ID","offset","width","goodfit")
+odss_main<-odss_data[vars_i_want]
+
+
+
+```
+
+```{r}
+#do what was done before
+odss_melt<-tidyr::pivot_longer(odss_data, cols = c('near0','near90'),names_to = c('condition'))
+odss_melt$grp = as.factor(odss_melt$grp)
+odss_melt$LogMARcen = odss_melt$LogMAR-mean(odss_melt$LogMAR)
+mod<-afex::aov_ez(
+    data = odss_melt
+    , dv = 'value'
+    , id = 'ID'
+    , within = 'condition'
+    , between = 'grp'
+    , covariate = 'LogMARcen'
+    , type = 3
+    , factorize = FALSE
+    , anova_table=list(correction = "HF")
+)
+mod
+vjpackage::pub_ready_stats(mod)
+
+```
+
+```{r}
+
+#post_hocs
+ph<-emmeans::emmeans(mod, ~ grp | condition, contr = "pairwise",adjust = "fdr")
+
+# this is just group comparisons
+emmeans::emmeans(mod, "grp", contr='pairwise',adjust = "none")
+# this gives within subjects comparisons for each group
+ems<-emmeans::emmeans(mod, ~ condition | grp, adjust = "fdr")
+pairs(ems, simple = "each")
+# this gives group comparisons within each condition
+ems<-emmeans::emmeans(mod, ~ grp | condition, adjust = "fdr")
+pairs(ems, simple = "each",adjust = "fdr")
+
+
+mod<-afex::aov_ez(
+    data = odss_melt
+    , dv = 'value'
+    , id = 'ID'
+    , within = 'condition'
+    , between = c('grp')
+    , type = 2
+    , factorize = FALSE
+    , anova_table=list(correction = "HF")
+)
+vjpackage::pub_ready_stats(mod)
+
+
+```
+
+```{r}
+# do parameter ANOVAs next so get rid of bad fitters
+odss_goodbois<-odss_main[odss_main$goodfit==1,]
+
+# start with M
+odss_goodbois$LogMARcen = odss_goodbois$LogMAR-mean(odss_goodbois$LogMAR)
+odss_goodbois$LogMARbin = as.integer(odss_goodbois$LogMAR<.1)
+mod<-afex::aov_ez(data = odss_goodbois
+    , dv = 'M'
+    , id = 'ID'
+    , between = 'grp'
+    , covariate = 'LogMARcen'
+    , type = 2
+    , factorize = FALSE)
+vjpackage::pub_ready_stats(mod)
+emmeans::emmeans(mod, "grp", contr='pairwise',adjust = "fdr")
+
+```
+
+```{r}
+
+mod<-afex::aov_ez(data = odss_goodbois
+    , dv = 'M'
+    , id = 'ID'
+    , between = c('grp')
+    , type = 2
+    , factorize = FALSE)
+vjpackage::pub_ready_stats(mod)
+emmeans::emmeans(mod, "grp", contr='pairwise',adjust = "none")
+
+```
+
+```{r}
+
+#moderator model
+mod<-afex::aov_ez(data = odss_goodbois
+    , dv = 'M'
+    , id = 'ID'
+    , between = c('grp','LogMARbin')
+    , type = 2
+    , factorize = TRUE)
+vjpackage::pub_ready_stats(mod)
+
+odss_goodbois$IQbin = as.integer(odss_goodbois$IQ<median(odss_goodbois$IQ))
+
+mod<-afex::aov_ez(data = odss_goodbois
+    , dv = 'M'
+    , id = 'ID'
+    , between = c('grp','IQbin')
+    , type = 2
+    , factorize = TRUE)
+vjpackage::pub_ready_stats(mod)
+
+mod<-afex::aov_ez(data = odss_goodbois
+    , dv = 'M'
+    , id = 'ID'
+    , between = c('grp','IQ')
+    , type = 2
+    , factorize = FALSE)
+vjpackage::pub_ready_stats(mod)
+
+```
+
+```{r}
+# offset w and w/out acuity
+mod<-afex::aov_ez(data = odss_goodbois
+    , dv = 'offset'
+    , id = 'ID'
+    , between = c('grp')
+    , covariate = 'LogMARcen'
+    , type = 2
+    , factorize = FALSE)
+vjpackage::pub_ready_stats(mod)
+emmeans::emmeans(mod, "grp", contr='pairwise',adjust = "fdr")
+
+mod<-afex::aov_ez(data = odss_goodbois
+    , dv = 'offset'
+    , id = 'ID'
+    , between = c('grp')
+    , type = 2
+    , factorize = FALSE)
+vjpackage::pub_ready_stats(mod)
+emmeans::emmeans(mod, "grp", contr='pairwise',adjust = "fdr")
+
+```
+
+```{r}
+# width w and w/out acuity
+mod<-afex::aov_ez(data = odss_goodbois
+    , dv = 'width'
+    , id = 'ID'
+    , between = c('grp')
+    , type = 2
+    , covariate = 'LogMARcen'
+    , factorize = FALSE)
+vjpackage::pub_ready_stats(mod)
+
+mod<-afex::aov_ez(data = odss_goodbois
+    , dv = 'width'
+    , id = 'ID'
+    , between = c('grp')
+    , type = 2
+    , factorize = FALSE)
+post_hoc_res<-emmeans::emmeans(mod, "grp", contr='pairwise')
+vjpackage::pub_ready_stats(mod)
+
+```
+

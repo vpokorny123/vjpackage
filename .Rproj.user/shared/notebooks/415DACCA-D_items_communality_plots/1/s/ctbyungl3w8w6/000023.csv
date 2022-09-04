@@ -1,0 +1,4 @@
+"0","# just messing with log scaling here"
+"0","png('/Users/pokor076/My Drive/Multivariate/final project/Plots/Figure 3 log.png',width = 1500, height = 1200, res = 170, pointsize = 15)"
+"0","par(mfrow = c(1,2))"
+"0","plot(log(items2facs), avg_indeterm, ylab = 'Average Indeterminacy', xlab = '# of Items/# of Factors', pch = '')"

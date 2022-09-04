@@ -1,0 +1,19 @@
+"0","mod<-afex::aov_ez(data = odss_goodbois
+    , dv = 'width'
+    , id = 'ID'
+    , between = c('grp')
+    , type = 2
+    , factorize = FALSE)
+"
+"2","Contrasts set to contr.sum for the following variables: grp
+"
+"0","vjpackage::pub_ready_stats(mod)"
+"1","    "
+"1"," [,1] "
+"1"," [,2]                            "
+"1","
+[1,]"
+"1"," ""grp"""
+"1"," ""F(4,124)=1.01, p=0.41, η²=.031"""
+"1","
+"

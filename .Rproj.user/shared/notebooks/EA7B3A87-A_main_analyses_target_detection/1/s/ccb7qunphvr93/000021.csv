@@ -1,0 +1,4 @@
+"0","  "
+"0","  ggsave(paste0('perc_var_',task,'.png'),"
+"0","         arrangeGrob(cbind(table_row_name,lg,size = ""last"")),"
+"0","         height = 8, width = 6, dpi = 400)"

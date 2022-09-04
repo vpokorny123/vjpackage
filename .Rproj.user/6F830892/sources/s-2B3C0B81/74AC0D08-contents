@@ -1,0 +1,348 @@
+---
+title: "Untitled"
+output: html_document
+date: '2022-04-09'
+---
+
+```{r}
+PF16<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/16PF/data.csv',data.table = FALSE)
+BIG5<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/BIG5/data.csv',data.table = FALSE)
+SD3<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/SD3/data.csv',data.table = FALSE)
+MPQ<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/MPQ/MPQ.AGE17.csv',data.table = FALSE)
+PID5<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/PID5/pid5.full.csv',data.table = FALSE)
+
+PF16_qs<-PF16[,1:(ncol(PF16)-6)]
+BIG5_qs<-BIG5[,8:(ncol(BIG5))]
+SD3_qs<- SD3[,1:(ncol(SD3)-2)]
+MPQ_qs<- MPQ[,grepl("Q",colnames(MPQ))]
+PID5_qs<- PID5[,grepl("Q",colnames(PID5))]
+
+#zeros are missed items
+PF16_qs[PF16_qs==0]<-NA
+BIG5_qs[BIG5_qs==0]<-NA
+SD3_qs[SD3_qs==0]<-NA
+
+PF16_comp_qs<-PF16_qs[complete.cases(PF16_qs),]
+BIG5_comp_qs<-BIG5_qs[complete.cases(BIG5_qs),]
+SD3_comp_qs<-SD3_qs[complete.cases(SD3_qs),]
+MPQ_comp_qs<-MPQ_qs[complete.cases(MPQ_qs),]
+PID5_comp_qs<-PID5_qs[complete.cases(PID5_qs),]
+
+#how many folks got dropped
+nrow(PF16) - nrow(PF16_comp_qs)
+nrow(BIG5) - nrow(BIG5_comp_qs)
+nrow(SD3) - nrow(SD3_comp_qs)
+nrow(PID5) - nrow(PID5_comp_qs)
+nrow(MPQ) - nrow(MPQ_comp_qs)
+
+#write.csv(PF16_comp_qs,'/Users/pokor076/My Drive/Multivariate/final #project/datasets/16PF/data_cleaned.csv', row.names = FALSE)
+#write.csv(BIG5_comp_qs, '/Users/pokor076/My Drive/Multivariate/final #project/datasets/BIG5/data_cleaned.csv', row.names = FALSE)
+#write.csv(SD3_comp_qs, '/Users/pokor076/My Drive/Multivariate/final #project/datasets/SD3/data_cleaned.csv', row.names = FALSE)
+#write.csv(MPQ_comp_qs, '/Users/pokor076/My Drive/Multivariate/final #project/datasets/MPQ/MPQ_cleaned.csv', row.names = FALSE)
+#write.csv(PID5_comp_qs, '/Users/pokor076/My Drive/Multivariate/final #project/datasets/PID5/PID5_cleaned.csv', row.names = FALSE)
+
+```
+
+```{r}
+# reverse scoring
+# create vector of ones and negative ones
+PF16_rev_idx<-c(rep(1,7),rep(-1,3), #warmth has 10 items 
+                rep(1,8), rep(-1,5), #intellect and has 13
+                rep(1,5), rep(-1,5), #emotinal stability and has 10
+                rep(1,6), rep(-1,4), # dominance and has 10 items
+                rep(1,6), rep(-1,4), # liveliness and has 10 items
+                rep(1,5), rep(-1,5), #rule-consciousness and has 10 items
+                rep(1,5), rep(-1,5), #social boldness and has 10 items
+                rep(1,6), rep(-1,4), #sensitivity and has 10 items
+                rep(1,6), rep(-1,4), #vigilance and has 10 items
+                rep(1,7), rep(-1,3), #imagination and has 10 items
+                rep(1,5), rep(-1,5), #reserve and has 10 items
+                rep(1,7), rep(-1,3), #apprehension and has 10 items
+                rep(1,5), rep(-1,5), #openness to change and has 10 items
+                rep(1,7), rep(-1,3), #self-reliance has 10items 
+                rep(1,5), rep(-1,5), #perfectionism has 10items 
+                rep(1,7), rep(-1,3) #tension  has 10items 
+                )
+PF16_comp_qs_rev = PF16_comp_qs
+jj = 1
+for (j in PF16_rev_idx) {
+  if (j == -1) {PF16_comp_qs_rev[,jj] = 6 - PF16_comp_qs[,jj]}
+  jj = jj + 1 
+}
+
+write.csv(PF16_comp_qs_rev,'/Users/pokor076/My Drive/Multivariate/final project/datasets/16PF/data_cleaned_rev_scored.csv', row.names = FALSE)
+
+
+#now do BIG5
+BIG5_rev_idx<- c(1,-1,1,-1,1,-1,1,-1,1,-1, # 10 extraversion items
+                 1,-1,1,-1,rep(1,6), #10 neuroticism items
+                 -1,1,-1,1,-1,1,-1,1,1,1, # 10 agreeableness
+                 1,-1,1,-1, 1,-1,1,-1,1,1, #10 conscientiousness
+                 1,-1,1,-1,1,-1,1,1,1,1)
+
+BIG5_comp_qs_rev = BIG5_comp_qs
+jj = 1
+for (j in BIG5_rev_idx) {
+  if (j == -1) {BIG5_comp_qs_rev[,jj] = 6 - BIG5_comp_qs[,jj]}
+  jj = jj + 1 
+}
+
+write.csv(BIG5_comp_qs_rev,'/Users/pokor076/My Drive/Multivariate/final project/datasets/BIG5/data_cleaned_rev_scored.csv', row.names = FALSE)
+
+#now do sd3
+SD3_rev_idx<- c(rep(1,9), # Machiavellianism is 9 and all +
+                1,-1,1,1,1,-1,1,-1,1, # Narcissism is 9
+                1,-1,1,1,1,1,-1,1,1
+                )
+SD3_comp_qs_rev = SD3_comp_qs
+jj = 1
+for (j in SD3_rev_idx) {
+  if (j == -1) {SD3_comp_qs_rev[,jj] = 6 - SD3_comp_qs[,jj]}
+  jj = jj + 1 
+}
+
+write.csv(SD3_comp_qs_rev,'/Users/pokor076/My Drive/Multivariate/final project/datasets/SD3/data_cleaned_rev_scored.csv', row.names = FALSE)
+```
+
+```{r}
+#create binary weight matrices for sum scores
+PF16_weights<- as.integer(grepl("A",colnames(PF16_comp_qs_rev)))
+PF16_weights<-cbind(PF16_weights,as.integer(grepl("B",colnames(PF16_comp_qs_rev))))
+PF16_weights<-cbind(PF16_weights,as.integer(grepl("C",colnames(PF16_comp_qs_rev))))
+PF16_weights<-cbind(PF16_weights,as.integer(grepl("D",colnames(PF16_comp_qs_rev))))
+PF16_weights<-cbind(PF16_weights,as.integer(grepl("E",colnames(PF16_comp_qs_rev))))
+PF16_weights<-cbind(PF16_weights,as.integer(grepl("F",colnames(PF16_comp_qs_rev))))
+PF16_weights<-cbind(PF16_weights,as.integer(grepl("G",colnames(PF16_comp_qs_rev))))
+PF16_weights<-cbind(PF16_weights,as.integer(grepl("H",colnames(PF16_comp_qs_rev))))
+PF16_weights<-cbind(PF16_weights,as.integer(grepl("I",colnames(PF16_comp_qs_rev))))
+PF16_weights<-cbind(PF16_weights,as.integer(grepl("J",colnames(PF16_comp_qs_rev))))
+PF16_weights<-cbind(PF16_weights,as.integer(grepl("K",colnames(PF16_comp_qs_rev))))
+PF16_weights<-cbind(PF16_weights,as.integer(grepl("L",colnames(PF16_comp_qs_rev))))
+PF16_weights<-cbind(PF16_weights,as.integer(grepl("M",colnames(PF16_comp_qs_rev))))
+PF16_weights<-cbind(PF16_weights,as.integer(grepl("N",colnames(PF16_comp_qs_rev))))
+PF16_weights<-cbind(PF16_weights,as.integer(grepl("O",colnames(PF16_comp_qs_rev))))
+PF16_weights<-cbind(PF16_weights,as.integer(grepl("P",colnames(PF16_comp_qs_rev))))
+PF16_weights<-as.matrix(PF16_weights)
+
+BIG5_weights <- as.integer(grepl("E",colnames(BIG5_comp_qs_rev)))
+BIG5_weights<-cbind(BIG5_weights,as.integer(grepl("N",colnames(BIG5_comp_qs_rev))))
+BIG5_weights<-cbind(BIG5_weights,as.integer(grepl("A",colnames(BIG5_comp_qs_rev))))
+BIG5_weights<-cbind(BIG5_weights,as.integer(grepl("C",colnames(BIG5_comp_qs_rev))))
+BIG5_weights<-cbind(BIG5_weights,as.integer(grepl("O",colnames(BIG5_comp_qs_rev))))
+
+SD3_weights <- as.integer(grepl("M",colnames(SD3_comp_qs_rev)))
+SD3_weights<-cbind(SD3_weights,as.integer(grepl("N",colnames(SD3_comp_qs_rev))))
+SD3_weights<-cbind(SD3_weights,as.integer(grepl("P",colnames(SD3_comp_qs_rev))))
+
+MPQ_cleaned<-as.data.frame(sapply(MPQ_comp_qs, as.numeric))
+# create rev scored version for convenience
+MPQ_cleaned_rev<- 3-MPQ_cleaned
+colnames(MPQ_cleaned_rev)<- paste0('-',colnames(MPQ_cleaned_rev))
+MPQ_cleaned_all = cbind(MPQ_cleaned, MPQ_cleaned_rev)
+
+#do scale construction here for MPQ
+MPQ_WB = unlist(strsplit("-Q20,-Q26,-Q44,-Q48,-Q66,-Q78,-Q83,-Q97,-Q103,-Q116,-Q127,-Q133,-Q140,-Q155,-Q172,-Q178,-Q186,-Q192", split = ','))
+MPQ_SP = unlist(strsplit("-Q1,-Q14,Q30,-Q40,-Q54,-Q61,Q70,-Q77,Q91,-Q110,Q119,-Q132,Q142,-Q153,-Q162,Q170,-Q184,Q191", split = ','))
+MPQ_AC = unlist(strsplit("-Q8,-Q23,-Q32,-Q46,-Q56,Q65,-Q74,-Q82,Q94,-Q104,-Q115,Q125,-Q137,-Q145,Q160,-Q167,Q188,-Q197", split = ','))
+MPQ_SC = unlist(strsplit("-Q4,Q11,-Q19,Q28,-Q35,Q43,-Q50,Q57,Q68,Q85,-Q93,Q106,Q124,Q143,-Q156,Q165,Q175,-Q182", split = ','))
+MPQ_SR = unlist(strsplit("-Q3,-Q10,-Q16,-Q25,Q41,-Q49,-Q63,-Q79,-Q86,-Q95,-Q111,-Q120,-Q136,Q144,-Q154,-Q177,-Q187,-Q195", split = ','))
+MPQ_AL = unlist(strsplit("-Q9,-Q17,-Q34,-Q42,Q51,-Q59,-Q80,-Q88,-Q101,-Q114,-Q122,Q131,-Q148,-Q158,-Q166,-Q176,-Q189,-Q198", split = ','))
+MPQ_AG = unlist(strsplit("-Q5,-Q13,-Q24,-Q38,-Q47,-Q55,-Q67,Q75,-Q87,-Q98,-Q109,-Q128,Q141,-Q152,-Q163,-Q173,Q183,-Q196", split = ','))
+MPQ_CON = unlist(strsplit("-Q2,-Q15,Q27,-Q31,Q37,-Q53,Q60,-Q69,Q92,-Q102,Q112,-Q121,Q129,-Q138,-Q149,Q159,-Q180,Q193", split = ','))
+MPQ_HA = unlist(strsplit("Q21,Q45,Q62,-Q71,Q76,-Q84,Q90,-Q100,Q108,-Q117,-Q130,Q139,-Q147,Q157,Q164,-Q171,-Q185,Q194", split = ','))
+#skipping RT cuz don't know what it is and not on wiki
+MPQ_TR = unlist(strsplit("-Q7,Q18,-Q36,-Q52,Q58,-Q64,-Q72,-Q96,-Q105,-Q113,-Q126,Q135,-Q150,-Q161,-Q168,-Q174,Q181,-Q190", split = ','))
+MPQ_AB = unlist(strsplit("-Q6,-Q12,-Q22,-Q29,-Q33,-Q39,-Q73,-Q81,-Q89,Q99,-Q107,-Q118,-Q123,-Q134,-Q146,-Q151,-Q169,-Q179", split = ','))
+all_MPQ<-c(MPQ_AB,MPQ_TR,MPQ_HA,MPQ_CON,MPQ_AG,MPQ_AL,MPQ_SR,MPQ_SC,MPQ_AC,MPQ_SP,MPQ_WB )
+MPQ_comp_qs_rev<-dplyr::select(MPQ_cleaned_all,all_of(all_MPQ))
+write.csv(MPQ_comp_qs_rev,'/Users/pokor076/My Drive/Multivariate/final project/datasets/MPQ/data_cleaned_rev_scored.csv', row.names = FALSE)
+
+
+#now need to create the weight matrix
+rename_MPQ<-c(paste0('AB',MPQ_AB),paste0('TR',MPQ_TR),paste0('HA',MPQ_HA),paste0('CON',MPQ_CON),paste0('AG',MPQ_AG),paste0('AL',MPQ_AL),paste0('SR',MPQ_SR),paste0('SC',MPQ_SC),paste0('AC',MPQ_AC),paste0('SP',MPQ_SP),paste0('WB',MPQ_WB) )
+
+MPQ_weights<- as.integer(grepl("AB",rename_MPQ))
+MPQ_weights<- cbind(MPQ_weights,as.integer(grepl("TR",rename_MPQ)))
+MPQ_weights<- cbind(MPQ_weights,as.integer(grepl("HA",rename_MPQ)))
+MPQ_weights<- cbind(MPQ_weights,as.integer(grepl("CON",rename_MPQ)))
+MPQ_weights<- cbind(MPQ_weights,as.integer(grepl("AG",rename_MPQ)))
+MPQ_weights<- cbind(MPQ_weights,as.integer(grepl("AL",rename_MPQ)))
+MPQ_weights<- cbind(MPQ_weights,as.integer(grepl("SR",rename_MPQ)))
+MPQ_weights<- cbind(MPQ_weights,as.integer(grepl("SC",rename_MPQ)))
+MPQ_weights<- cbind(MPQ_weights,as.integer(grepl("AC",rename_MPQ)))
+MPQ_weights<- cbind(MPQ_weights,as.integer(grepl("SP",rename_MPQ)))
+MPQ_weights<- cbind(MPQ_weights,as.integer(grepl("WB",rename_MPQ)))
+
+# reverse coding items
+PID5_cleaned<-PID5_comp_qs
+colnames(PID5_cleaned)<- paste0(colnames(PID5_cleaned),"_pid5")
+PID5_cleaned$Q7_pid5<- 3 - PID5_cleaned$Q7_pid5
+PID5_cleaned$Q30_pid5<- 3 - PID5_cleaned$Q30_pid5
+PID5_cleaned$Q35_pid5<- 3 - PID5_cleaned$Q35_pid5
+PID5_cleaned$Q58_pid5<- 3 - PID5_cleaned$Q58_pid5
+PID5_cleaned$Q87_pid5<- 3 - PID5_cleaned$Q87_pid5
+PID5_cleaned$Q90_pid5<- 3 - PID5_cleaned$Q90_pid5
+PID5_cleaned$Q96_pid5<- 3 - PID5_cleaned$Q96_pid5
+PID5_cleaned$Q97_pid5<- 3 - PID5_cleaned$Q97_pid5
+PID5_cleaned$Q98_pid5<- 3 - PID5_cleaned$Q98_pid5
+PID5_cleaned$Q131_pid5<- 3 - PID5_cleaned$Q131_pid5
+PID5_cleaned$Q142_pid5<- 3 - PID5_cleaned$Q142_pid5
+PID5_cleaned$Q155_pid5<- 3 - PID5_cleaned$Q155_pid5
+PID5_cleaned$Q164_pid5<- 3 - PID5_cleaned$Q164_pid5
+PID5_cleaned$Q177_pid5<- 3 - PID5_cleaned$Q177_pid5
+PID5_cleaned$Q210_pid5<- 3 - PID5_cleaned$Q210_pid5
+PID5_cleaned$Q215_pid5<- 3 - PID5_cleaned$Q215_pid5
+
+PID5_Anhedonia <- c('Q1_pid5', 'Q23_pid5', 'Q26_pid5',
+                                   'Q30_pid5', 'Q124_pid5','Q155_pid5',
+                                   'Q157_pid5', 'Q189_pid5')
+PID5_Anhedonia_rename<-paste0("Anhedonia",PID5_Anhedonia)
+PID5_Anxiousness<- c('Q79_pid5','Q93_pid5','Q95_pid5',
+                                     'Q96_pid5','Q109_pid5','Q110_pid5',
+                                     'Q130_pid5','Q141_pid5','Q174_pid5')
+PID5_Anxiousness_rename<-paste0("Anxiousness",PID5_Anxiousness)
+PID5_AttnSeek<- c('Q14_pid5','Q43_pid5','Q74_pid5',
+                                     'Q111_pid5','Q113_pid5','Q173_pid5',
+                                     'Q191_pid5','Q211_pid5')
+PID5_AttnSeek_rename<-paste0("AttnSeek",PID5_AttnSeek)
+PID5_Callousness <- c('Q11_pid5', 'Q13_pid5','Q19_pid5',
+                                     'Q54_pid5','Q72_pid5','Q73_pid5',
+                                     'Q90_pid5','Q153_pid5','Q166_pid5',
+                                     'Q183_pid5','Q198_pid5','Q200_pid5',
+                                     'Q207_pid5','Q208_pid5')
+PID5_Callousness_rename<-paste0("Callousness",PID5_Callousness)
+PID5_Deceitfulness<-c('Q41_pid5','Q53_pid5','Q56_pid5',
+                                     'Q76_pid5', 'Q126_pid5','Q134_pid5',
+                                     'Q142_pid5','Q206_pid5','Q214_pid5',
+                                     'Q218_pid5')
+PID5_Deceitfulness_rename<-paste0("Deceitfulness",PID5_Deceitfulness)
+PID5_Depressivity<- c('Q27_pid5','Q61_pid5','Q66_pid5',
+                                     'Q81_pid5','Q86_pid5','Q104_pid5',
+                                     'Q119_pid5','Q148_pid5','Q151_pid5',
+                                     'Q163_pid5','Q168_pid5','Q169_pid5',
+                                     'Q178_pid5','Q212_pid5')
+PID5_Depressivity_rename<-paste0("Depressivity",PID5_Depressivity)
+PID5_Distractability<-c('Q6_pid5','Q29_pid5','Q47_pid5',
+                                       'Q68_pid5','Q88_pid5','Q118_pid5',
+                                       'Q132_pid5','Q144_pid5','Q199_pid5')
+PID5_Distractability_rename<-paste0("Distractability",PID5_Distractability)
+PID5_Eccentricity<- c('Q5_pid5','Q21_pid5','Q24_pid5',
+                                     'Q25_pid5','Q33_pid5','Q52_pid5',
+                                     'Q55_pid5','Q70_pid5','Q71_pid5',
+                                     'Q152_pid5','Q172_pid5','Q185_pid5',
+                                     'Q205_pid5')
+PID5_Eccentricity_rename<-paste0("Eccentricity",PID5_Eccentricity)
+PID5_EmtnLability<- c('Q18_pid5', 'Q62_pid5','Q102_pid5',
+                                     'Q122_pid5','Q138_pid5','Q165_pid5',
+                                     'Q181_pid5')
+PID5_EmtnLability_rename<-paste0("EmtnLability",PID5_EmtnLability)
+PID5_Grandiosity<-  c('Q40_pid5','Q65_pid5','Q114_pid5',
+                                     'Q179_pid5','Q187_pid5','Q197_pid5')
+PID5_Grandiosity_rename<-paste0("Grandiosity",PID5_Grandiosity)
+PID5_Hostility<- c('Q28_pid5','Q32_pid5','Q38_pid5',
+                                 'Q85_pid5','Q92_pid5','Q116_pid5',
+                                 'Q158_pid5','Q170_pid5','Q188_pid5',
+                                 'Q216_pid5')
+PID5_Hostility_rename<-paste0("Hostility",PID5_Hostility)
+PID5_Impulsivity<- c('Q4_pid5','Q16_pid5','Q17_pid5',
+                                    'Q22_pid5','Q58_pid5','Q204_pid5')
+PID5_Impulsivity_rename<-paste0("Impulsivity",PID5_Impulsivity)
+PID5_IntimacyAvoidance<- c('Q89_pid5','Q97_pid5','Q108_pid5',
+                                          'Q120_pid5','Q145_pid5','Q203_pid5')
+PID5_IntimacyAvoidance_rename<-paste0("IntimacyAvoidance",PID5_IntimacyAvoidance)
+PID5_Irresponsibility<- c('Q31_pid5', 'Q129_pid5','Q156_pid5',
+                                         'Q160_pid5','Q171_pid5','Q201_pid5',
+                                         'Q210_pid5')
+PID5_Irresponsibility_rename<-paste0("Irresponsibility",PID5_Irresponsibility)
+PID5_Manipulativeness<- c('Q107_pid5','Q125_pid5','Q162_pid5',
+                                         'Q180_pid5','Q219_pid5')
+PID5_Manipulativeness_rename<-paste0("Manipulativeness",PID5_Manipulativeness)
+PID5_PerceptualDysreg<- c('Q36_pid5','Q37_pid5','Q42_pid5',
+                                         'Q44_pid5','Q59_pid5','Q77_pid5',
+                                         'Q83_pid5','Q154_pid5','Q192_pid5',
+                                         'Q193_pid5','Q213_pid5','Q217_pid5')
+PID5_PerceptualDysreg_rename<-paste0("PerceptualDysreg",PID5_PerceptualDysreg)
+PID5_Perseveration<- c('Q46_pid5','Q51_pid5','Q60_pid5',
+                                      'Q78_pid5','Q80_pid5','Q100_pid5',
+                                      'Q121_pid5','Q128_pid5','Q137_pid5')
+PID5_Perseveration_rename<-paste0("Perseveration",PID5_Perseveration)
+PID5_RestrictedAffect<- c('Q8_pid5','Q45_pid5','Q84_pid5',
+                          'Q91_pid5','Q101_pid5','Q167_pid5',
+                                         'Q184_pid5')
+PID5_RestrictedAffect_rename<-paste0("RestrictedAffect",PID5_RestrictedAffect)
+PID5_RigidPerfect<- c('Q34_pid5','Q49_pid5','Q105_pid5',
+                                     'Q115_pid5','Q123_pid5','Q135_pid5',
+                                     'Q140_pid5','Q176_pid5','Q196_pid5',
+                                     'Q220_pid5')
+PID5_RigidPerfect_rename<-paste0("RigidPerfect",PID5_RigidPerfect)
+PID5_RiskTaking<- c('Q3_pid5','Q7_pid5','Q35_pid5',
+                                   'Q39_pid5','Q48_pid5','Q67_pid5',
+                                   'Q69_pid5','Q87_pid5','Q98_pid5',
+                                   'Q112_pid5','Q159_pid5','Q164_pid5',
+                                   'Q195_pid5','Q215_pid5')
+PID5_RiskTaking_rename<-paste0("RiskTaking",PID5_RiskTaking)
+PID5_SeparationInsecurity <- c('Q12_pid5', 'Q50_pid5', 'Q57_pid5',
+                                              'Q64_pid5', 'Q127_pid5', 'Q149_pid5',
+                                              'Q175_pid5')
+PID5_SeparationInsecurity_rename<-paste0("SeparationInsecurity",PID5_SeparationInsecurity)
+PID5_Submissiveness<- c('Q9_pid5', 'Q15_pid5', 'Q63_pid5',
+                                       'Q202_pid5')
+PID5_Submissiveness_rename<-paste0("Submissiveness",PID5_Submissiveness)
+PID5_Suspiciousness<- c('Q2_pid5', 'Q103_pid5', 'Q117_pid5',
+                                       'Q131_pid5','Q133_pid5','Q177_pid5',
+                                       'Q190_pid5')
+PID5_Suspiciousness_rename<-paste0("Suspiciousness",PID5_Suspiciousness)
+PID5_UnusualBeliefs<- c('Q94_pid5', 'Q99_pid5', 'Q106_pid5',
+                                       'Q139_pid5','Q143_pid5','Q150_pid5',
+                                       'Q194_pid5','Q209_pid5')
+PID5_UnusualBeliefs_rename<-paste0("UnusualBeliefs",PID5_UnusualBeliefs)
+PID5_Withdrawal<- c('Q10_pid5', 'Q20_pid5', 'Q75_pid5',
+                                   'Q82_pid5', 'Q136_pid5','Q146_pid5',
+                                   'Q147_pid5','Q161_pid5','Q182_pid5',
+                                   'Q186_pid5')
+PID5_Withdrawal_rename<-paste0("Withdrawal",PID5_Withdrawal)
+
+order_PID5 = c(PID5_Anhedonia, PID5_Anxiousness, PID5_AttnSeek, PID5_Callousness, PID5_Deceitfulness,
+                PID5_Depressivity,PID5_Distractability,PID5_Eccentricity,PID5_EmtnLability,
+                PID5_Grandiosity,PID5_Hostility,PID5_Impulsivity,PID5_IntimacyAvoidance,
+                PID5_Irresponsibility,PID5_Manipulativeness,PID5_PerceptualDysreg,
+                PID5_Perseveration,PID5_RestrictedAffect,PID5_RigidPerfect,PID5_RiskTaking,
+                PID5_SeparationInsecurity,PID5_Submissiveness,PID5_Suspiciousness,PID5_UnusualBeliefs,
+                PID5_Withdrawal)
+#create PID5 weights
+PID5_comp_qs_rev<-dplyr::select(PID5_cleaned,all_of(order_PID5))
+write.csv(PID5_comp_qs_rev,'/Users/pokor076/My Drive/Multivariate/final project/datasets/PID5/data_cleaned_rev_scored.csv', row.names = FALSE)
+rename_PID5 = c(PID5_Anhedonia_rename, PID5_Anxiousness_rename, PID5_AttnSeek_rename, PID5_Callousness_rename,PID5_Deceitfulness_rename,PID5_Depressivity_rename,PID5_Distractability_rename,PID5_Eccentricity_rename,PID5_EmtnLability_rename,PID5_Grandiosity_rename,PID5_Hostility_rename,PID5_Impulsivity_rename,PID5_IntimacyAvoidance_rename,PID5_Irresponsibility_rename,PID5_Manipulativeness_rename,PID5_PerceptualDysreg_rename,PID5_Perseveration_rename,PID5_RestrictedAffect_rename,PID5_RigidPerfect_rename,PID5_RiskTaking_rename,PID5_SeparationInsecurity_rename,PID5_Submissiveness_rename,PID5_Suspiciousness_rename,PID5_UnusualBeliefs_rename,PID5_Withdrawal_rename)
+
+PID5_weights<- as.integer(grepl("Anhedonia",rename_PID5))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("Anxiousness",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("AttnSeek",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("Callousness",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("Deceitfulness",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("Depressivity",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("Distractability",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("Eccentricity",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("EmtnLability",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("Grandiosity",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("Hostility",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("Impulsivity",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("IntimacyAvoidance",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("Irresponsibility",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("Manipulativeness",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("PerceptualDysreg",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("Perseveration",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("RestrictedAffect",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("RigidPerfect",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("RiskTaking",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("SeparationInsecurity",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("Submissiveness",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("Suspiciousness",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("UnusualBeliefs",rename_PID5)))
+PID5_weights<- cbind(PID5_weights,as.integer(grepl("Withdrawal",rename_PID5)))
+
+save(PID5_weights,file = "PID5_weights.RData")
+save(MPQ_weights,file = "MPQ_weights.RData")
+save(SD3_weights,file = "SD3_weights.RData")
+save(PF16_weights,file = "PF16_weights.RData")
+save(BIG5_weights,file = "BIG5_weights.RData")
+```

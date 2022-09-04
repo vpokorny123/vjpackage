@@ -1,0 +1,97 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+library(data.table)
+user_path <- '/Volumes/GoogleDrive/My Drive/NF-ODSS Behavior Revision/'
+odss_data<-as.data.frame(fread(paste0(user_path,'/paper_data.csv')))
+symptoms<-as.data.frame(fread(paste0(user_path,'/victor_1_24_22.csv')))
+symptoms$ID <- symptoms$subject_number
+# merge those mfs
+merged_data = merge(odss_data, symptoms, by = "ID")
+#get rid of 999s and 888s
+merged_data[merged_data == "888" | merged_data == "999"] <- NA
+
+# need to figure out why 10408200 is missing, but for now we'll just exclude
+merged_data
+
+```
+```{r}
+#start with SGI
+just_SGI<- dplyr::select(merged_data,starts_with('sgi'))
+#get rid of pesky and probably wrong sum scores
+just_SGI<-just_SGI[,6:dim(just_SGI)[2]]
+just_SGI <- dplyr::mutate_all(just_SGI, function(x) suppressWarnings(as.numeric(x)))
+
+```
+
+```{r}
+# 
+res<-psych::fa(just_SGI, nfactors = 4, fm = 'wls', rotate = "oblimin",scores = "Bartlett")
+summary(res)
+vjpackage::pub_ready_stats(res)
+print(res$loadings, cut = .3)
+vjpackage::vjpscatter(x = res$scores[,'WLS1'], y = merged_data$offset, x_label = "SGI Perceptual Modulation", y_label = "Offset")
+cor_res<- cor.test(res$scores[,'WLS1'],merged_data$offset,use = 'pairwise.complete.obs')
+vjpackage::pub_ready_stats(cor_res)
+```
+
+```{r}
+#SPQ
+just_SPQ<- dplyr::select(merged_data,starts_with('spq_'))
+#get rid of pesky and probably wrong sum scores
+just_SPQ<-just_SPQ[,1:74]
+just_SPQ <- dplyr::mutate_all(just_SPQ, function(x) suppressWarnings(as.numeric(x)))
+just_unusual_SPQ<- dplyr::select(merged_data,starts_with('spq_unus'))
+just_unusual_SPQ <- dplyr::mutate_all(just_unusual_SPQ, function(x) suppressWarnings(as.numeric(x)))
+```
+
+```{r}
+# full SPQ
+res<-psych::fa(just_SPQ, nfactors = 2, fm = 'wls', rotate = "oblimin",scores = "Bartlett")
+summary(res)
+print(res$loadings, cut = .2)
+vjpackage::vjpscatter(x = res$scores[,'WLS1'], y = merged_data$offset, x_label = "SPQ Factor 1", y_label = "Offset")
+vjpackage::vjpscatter(x = res$scores[,'WLS2'], y = merged_data$offset, x_label = "SPQ Factor 2", y_label = "Offset")
+```
+
+```{r}
+# just unusual SPQ
+res<-psych::fa(just_unusual_SPQ, nfactors = 1, fm = 'wls', rotate = "oblimin",scores = "Bartlett")
+summary(res)
+print(res$loadings, cut = .3)
+vjpackage::vjpscatter(x = res$scores[,'WLS1'], y = merged_data$offset, x_label = "SPQ Unusual Only Factor", y_label = "Offset")
+```
+```{r}
+just_unus_sum<-rowMeans(just_unusual_SPQ,na.rm = TRUE)
+cor.test(just_unus_sum,merged_data$M, use = 'pairwise.complete.obs')
+plot(just_unus_sum,merged_data$M)
+```
+```{r}
+# do BPRS next
+#SPQ
+just_BPRS<- dplyr::select(merged_data,starts_with('bprs',ignore.case = FALSE))
+just_BPRS<- just_BPRS[,1:dim(just_BPRS)[2]-1]
+just_BPRS <- dplyr::mutate_all(just_BPRS, function(x) as.numeric(x))
+```
+
+```{r}
+res<-psych::fa(just_BPRS, nfactors = 5, fm = 'wls', rotate = "oblimin", scores = "Bartlett")
+summary(res)
+vjpackage::pub_ready_stats(res)
+print(res$loadings, cut = .2)
+vjpackage::vjpscatter(x = res$scores[,'WLS5'], y = merged_data$offset, x_label = "BPRS factor 1", y_label = "Offset")
+```
+
+```{r}
+#try them all together THIS DOES NOT WORK lolol
+why_not<-cbind(just_BPRS,just_SGI,just_SPQ)
+why_not_cor<-cor(why_not,use = 'pairwise.complete.obs')
+res<-psych::fa(r = why_not_cor, nfactors = 40, fm = 'pa', rotate = "oblimin",scores = "regression")
+summary(res)
+
+```
+
+

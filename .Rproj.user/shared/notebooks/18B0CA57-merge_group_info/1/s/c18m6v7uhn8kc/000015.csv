@@ -1,0 +1,7 @@
+"0","d_and_d<-data.table::fread('/Users/pokor076/My Drive/PENS_2_MEG/PENS2 Diagnoses & Demographics - 3.30.22 PENS2 Diagnoses and Demographics.csv', data.table = FALSE)"
+"0","d_and_d$subIDs<-d_and_d$record_id"
+"0",""
+"0","MEG_info<- data.table::fread('/Users/pokor076/My Drive/PENS_2_MEG/final_report_less_stringent.csv', data.table = FALSE)"
+"0","MEG_info$subIDs<-MEG_info$`subject IDs`"
+"0","final= merge(d_and_d, MEG_info, by = ""subIDs"")"
+"0","final"

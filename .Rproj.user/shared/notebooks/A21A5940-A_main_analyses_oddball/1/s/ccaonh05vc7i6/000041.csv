@@ -1,0 +1,2 @@
+"0","  "
+"0","  ggsave(paste0('MeanAmps_',task,'.png'),arrangeGrob(cbind(table_row_name,lg,rg, size = ""last"")), height = 8, width = 6, dpi = 400)"

@@ -1,0 +1,11 @@
+"0","final<-data.table::fread(""/Users/pokor076/My Drive/Old Papers/VJP PENS_GTF_NPG Dichotic/R_bs/final_data_fixed.csv"")"
+"0","#check for repeaters"
+"0","final$Sub[!unique(final$Sub)]"
+"1","integer(0)
+"
+"0","length(final$Sub)"
+"1","[1]"
+"1"," 305"
+"1","
+"
+"0","#everything looks right!"

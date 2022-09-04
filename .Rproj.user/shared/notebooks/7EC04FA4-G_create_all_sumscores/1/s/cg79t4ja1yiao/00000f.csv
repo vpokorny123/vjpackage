@@ -1,0 +1,9 @@
+"0","load(""/Users/victorpokorny/Google Drive/MCTFR Psychosis/PID-5 and MPQ Psychoticism Project/complete_imputed_data.csv"")
+"
+"2","Warning in readChar(con, 5L, useBytes = TRUE) :"
+"2","
+ "
+"2"," cannot open compressed file '/Users/victorpokorny/Google Drive/MCTFR Psychosis/PID-5 and MPQ Psychoticism Project/complete_imputed_data.csv', probable reason 'No such file or directory'
+"
+"2","Error in readChar(con, 5L, useBytes = TRUE) : cannot open the connection
+"

@@ -1,0 +1,92 @@
+---
+title: "Untitled"
+output: html_document
+date: '2022-04-17'
+---
+
+```{r}
+PF16_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/16PF/data_cleaned_rev_scored.csv',data.table = FALSE)
+BIG5_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/BIG5/data_cleaned_rev_scored.csv',data.table = FALSE)
+SD3_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/SD3/data_cleaned_rev_scored.csv',data.table = FALSE)
+MPQ_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/MPQ/data_cleaned_rev_scored.csv',data.table = FALSE)
+PID5_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/PID5/data_cleaned_rev_scored.csv',data.table = FALSE)
+
+factor_names = list(
+  #PF16 A = Warmth, B = Reasoning
+  c('Warmth','Reasoning','Emotional Stability', 
+              'Assertiveness','Gregariousness','Dutifulness',
+              'Friendliness','Sensitivity', 'Distrust',
+              'Imagination','Reserve','Anxiety',
+              'Complexity','Introversion','Orderliness',
+              'Emotionality'),
+  #BIG 5
+              c('Extraversion','Neuroticism','Agreeableness','Conscientiousness','Openness'),
+  #SD3
+              c('Machiavellianism','Narcissism','Psychopathy'),
+  #MPQ
+                c('Absorption','Traditionalism','Harm Avoidance','Control',
+                 'Aggression','Alienation','Stress Reaction','Social Closeness',
+                 'Achievement','Social Potency','Well-Being'),
+  #PID5
+                    c("Anhedonia","Anxiousness","Attn. Seek","Callousness","Deceitfulness",
+                      "Depressivity","Distract.","Eccentricity", "Emo. Lability",
+                      "Grandiosity","Hostility","Impulsivity","Intim. Avoid.",
+                      "Irrespons.","Manip.","Perc. Dysreg.",
+                      "Perseveration", "Restr. Aff.", "Rig. Perf.",
+                      "Risk Taking","Sep. Insec.","Submiss.","Suspic.",
+                      "Unus. Beliefs","Withdrawal"))
+save(factor_names,file = "factor_names.RData")
+```
+
+```{r}
+library(fungible)
+library(psych)
+library(svglite)
+library(ggplot2)
+q_name = c("PF16","BIG5","SD3","MPQ","PID5")
+nfactors = c(16,5,3,11,25)
+maxes = NULL
+mins = NULL
+avg_indeterm = NULL
+png(paste0('/Users/pokor076/My Drive/Multivariate/final project/Plots/all_FSI.png'),
+    width = 2000, height = 2500, res = 190, pointsize = 14)
+par(mfrow=c(5,2),cex.axis=0.85)    
+for (j in seq(1,5)) {
+name = paste0(q_name[j],'_comp_qs_rev')
+res<-faMain(X = get(name), numFactors = nfactors[j], facMethod = 'fapa', rotate = 'promaxQ')
+# use the binary weight matrices to order the factors
+load(file = paste0(q_name[j],"_weights.RData"))
+FSCoef = as.matrix(get(paste0(q_name[j],"_weights")))
+# just reordering to the factors
+align_res = faAlign(FSCoef,res$loadings, Phi2 =res$Phi )
+loadings = align_res$F2 
+phi = align_res$Phi2
+Fstar = loadings %*% phi
+indeterm = sqrt(diag(t(Fstar) %*% solve(cor(get(name))) %*% Fstar))
+#guttman's
+gutt = as.vector(t((2*(indeterm^2))-1))
+maxes<-cbind(maxes,max(indeterm))
+mins<-cbind(mins,min(indeterm))
+avg_indeterm[j] <- mean(indeterm)
+
+plot(x = seq(1,nfactors[j]),y = indeterm,ylab = "Indeterminacy", xlab = "", ylim = c(.3,1), xaxt = "n")
+axis(1, at = seq(1, nfactors[j], 1),labels = factor_names[[j]],las = 2,outer = FALSE,lwd.ticks = 0, pos = .34, lwd = 0)
+
+plot(gutt,ylab = "Min. Correlation", xlab = "", ylim = c(.3,1),xaxt = "n")
+if (q_name[j] == "SD3"){
+  adj_val = -.2
+}
+else {
+  adj_val = -.2
+}
+mtext(q_name[j], side = 3, line = 1.5, adj = adj_val, font = 2)
+axis(1, at = seq(1, nfactors[j], 1),labels = factor_names[[j]],las = 2,lwd.ticks = 0, pos = .34, lwd = 0)
+}
+dev.off()
+
+```
+
+
+
+
+

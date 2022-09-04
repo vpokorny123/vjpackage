@@ -1,0 +1,7 @@
+"0","tt = ttheme_minimal()"
+"0","tt$core$fg_params <- list(fontface=matrix(c(2),"
+"0","                          ncol=1,nrow=3,byrow=TRUE)) # this makes row labels bold (2=bold)"
+"0","  table_row_name <- tableGrob(c(""Full Vs. Half"", ""Full Vs. 99%"", ""Full vs. 90%""),  theme= tt)"
+"0","  lg = grid.arrange(p[[1]],"
+"0","       p[[2]],"
+"0","       p[[3]], ncol = 1, nrow = 3)"

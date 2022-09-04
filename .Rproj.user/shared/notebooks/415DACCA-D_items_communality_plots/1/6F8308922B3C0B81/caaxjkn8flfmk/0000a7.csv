@@ -1,0 +1,6 @@
+"0","text(com_sum, avg_indeterm,labels = q_name,cex = .7)"
+"0","cor_res<-cor.test(com_sum,avg_indeterm)"
+"0","lm_res<-lm(avg_indeterm ~ com_sum)"
+"0","abline(lm_res$coefficients)"
+"0","text(mean(com_sum)+sd(com_sum), mean(avg_indeterm)-sd(avg_indeterm),bquote(paste0(""r^2="",round(cor_res$estimate^2,2))),cex = 1.1)"
+"0",""

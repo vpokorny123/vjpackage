@@ -1,0 +1,31 @@
+"0","mod<-afex::aov_ez(
+    data = odss_melt
+    , dv = 'value'
+    , id = 'ID'
+    , within = 'condition'
+    , between = c('grp')
+    , type = 2
+    , factorize = FALSE
+    , anova_table=list(correction = ""HF"")
+)
+"
+"2","Contrasts set to contr.sum for the following variables: grp
+"
+"0","vjpackage::pub_ready_stats(mod)"
+"1","    "
+"1"," [,1]           "
+"1"," [,2]                                    "
+"1","
+[1,]"
+"1"," ""grp""          "
+"1"," ""F(4,132)=2.34, p=0.06, η²=.066""        "
+"1","
+[2,]"
+"1"," ""condition""    "
+"1"," ""F(1.91,252.32)=159.85, p<.001, η²=.548"""
+"1","
+[3,]"
+"1"," ""grp:condition"""
+"1"," ""F(7.65,252.32)=1.84, p=0.07, η²=.053""  "
+"1","
+"

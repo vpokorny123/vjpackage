@@ -1,0 +1,62 @@
+---
+title: "Untitled"
+output: html_document
+date: '2022-06-23'
+---
+
+```{r}
+library(data.table)
+library(BayesFactor)
+odss_data<-as.data.frame(fread('/Users/pokor076/My Drive/NF-ODSS Behavior Revision/paper_data.csv'))
+odss_data$grp<-as.factor(odss_data$grp)
+
+odss_sz_ctrl = odss_data[odss_data$grp=='sz' | odss_data$grp=='ctrl', ]
+t.test( near0 ~ grp, data = odss_sz_ctrl, var.eq=FALSE)
+bf = ttestBF(formula = near0 ~ grp, data = odss_sz_ctrl, nullInterval = c(0, Inf))
+bf
+bf = ttestBF(formula = near0 ~ grp, data = odss_sz_ctrl)
+bf
+do
+bf = anovaBF(formula = near0 ~ grp, data = odss_data)
+bf
+bf = anovaBF(formula = near0 ~ 1, data = odss_data)
+bf
+bf = anovaBF(formula = near90 ~ grp, data = odss_data)
+bf
+bfnull = lmBF(formula = near0 ~ LogMAR, data = odss_data)
+bfnull
+bfgrp = lmBF(formula = near0 ~ grp, data = odss_data)
+bfgrp/bfnull
+
+bfnull = lmBF(formula = near90 ~ LogMAR, data = odss_data)
+bfnull
+bfgrp = lmBF(formula = near90 ~ grp, data = odss_data)
+bfgrp/bfnull
+
+grp_model =anova(lm( near90 ~ grp , data = odss_data))
+  null = lm( near90 ~ 1 , data = odss_data)
+  anova(grp_model,null)
+bf = generalTestBF(formula = near0 ~  LogMAR +grp , data = odss_data)
+bf
+bf = generalTestBF(formula = near90 ~  grp + LogMAR, data = odss_data)
+bf
+bf = generalTestBF(formula = near90 ~  LogMAR + grp, data = odss_data)
+bf
+anova(lm(near0 ~ LogMAR + grp, data = odss_data))
+
+group_names = unique(odss_data$grp)
+for (j in group_names){
+odss_data$near0_adj[odss_data$grp == j] = odss_data$near0[odss_data$grp == j]-mean(odss_data$LogMAR[odss_data$grp == j])}
+
+bf = generalTestBF(formula = near0_adj ~  grp, data = odss_data)
+bf
+
+anova(lm(odss_data$near0_adj ~ odss_data$grp))
+
+```
+```{r}
+anova(lm(near90~LogMAR + grp, odss_data))
+res<-lm(near90~LogMAR, odss_data)
+anova(lm(near90~LogMAR, odss_data))
+anova(lm(res$residual ~ grp, odss_data))
+```

@@ -1,0 +1,35 @@
+"0","library(ggplot2)"
+"0","library(data.table)"
+"2","data.table 1.14.2 using 1 threads (see ?getDTthreads).  Latest news: r-datatable.com
+"
+"2","**********
+This installation of data.table has not detected OpenMP support. It should still work but in single-threaded mode.
+This is a Mac. Please read https://mac.r-project.org/openmp/. Please engage with Apple and ask them for support. Check r-datatable.com for updates, and our Mac instructions here: https://github.com/Rdatatable/data.table/wiki/Installation. After several years of many reports of installation problems on Mac, it's time to gingerly point out that there have been no similar problems on Windows or Linux.
+**********
+"
+"0","library(tidyr)"
+"0","library(see)"
+"0","library(ggpp)"
+"2","
+Attaching package: ‘ggpp’
+
+"
+"2","The following object is masked from ‘package:ggplot2’:
+
+    annotate
+
+"
+"0","library(gridExtra)"
+"0","library(grid)"
+"0","task = 'Dichotic'"
+"0","#load in data"
+"0","main_df<-fread(paste0('/Users/pokor076/My Drive/Psychophysiology - ICA/Full Manuscript/R_scripts/csvs/', task, '_table4R.csv'))"
+"0","main_df$`% var mixed 90`<-as.numeric(main_df$`%var mixed 90`)"
+"2","Warning: NAs introduced by coercion"
+"0","main_df$`% var mixed 99`<-as.numeric(main_df$`% var mixed 99`)"
+"2","Warning: NAs introduced by coercion"
+"0","main_df$`% var mixed full`<-as.numeric(main_df$`% var mixed full`)"
+"0",""
+"0","#three one-tailed dependent samples t-tests will be computed to compare: 1) full #dimensionality ICA (fdICA) vs. 64 electrode ICA, 2.) fdICA vs. 99% variance PCA #before ICA and 3.) fdICA vs. 90% variance PCA before ICA."
+"0",""
+"0",""

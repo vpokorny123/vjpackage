@@ -1,0 +1,243 @@
+---
+title: "Untitled"
+output: html_document
+date: "2022-07-27"
+---
+
+```{r}
+library(ggplot2)
+library(data.table)
+library(tidyr)
+library(see)
+library(ggpp)
+library(gridExtra)
+library(grid)
+task = 'Dichotic'
+#load in data
+main_df<-fread(paste0('/Users/pokor076/My Drive/Psychophysiology - ICA/Full Manuscript/R_scripts/csvs/', task, '_table4R.csv'))
+main_df$`% var mixed 90`<-as.numeric(main_df$`%var mixed 90`)
+main_df$`% var mixed 99`<-as.numeric(main_df$`% var mixed 99`)
+main_df$`% var mixed full`<-as.numeric(main_df$`% var mixed full`)
+
+#three one-tailed dependent samples t-tests will be computed to compare: 1) full #dimensionality ICA (fdICA) vs. 64 electrode ICA, 2.) fdICA vs. 99% variance PCA #before ICA and 3.) fdICA vs. 90% variance PCA before ICA.
+
+
+```
+
+```{r}
+# mean amplitidue comparisons
+dv = "mean_amp"
+dv_label = "Mean Amp."
+comp_all = c("N1","P3")
+cond1 = "full"
+cond2_all = c("odds","x99","x90")
+cond1_lab = c("Full")
+trials_all = c("all", "rare_frequent")
+cond2_lab = c("Half", "99% Var.","90% Var.")
+hypothesis_dirs = c("l","g") # we expect full N1 to be more negative and full P3 to be more positive
+y_labs = 'Mean Amplitude (μV)'
+p = list()
+i = 1
+for (j in comp_all){
+  comp = j
+  trials = trials_all[i]
+  hypothesis_dir = hypothesis_dirs[i]
+  y_lab = y_labs
+  ii = 1
+  for (jj in cond2_all){
+    cond2  = jj
+    cond_labs = c(cond1_lab, cond2_lab[ii])
+plot_title = paste0(comp,"_",cond1,"_vs_", cond2)
+p[[(i-1)*3 + ii]] <- vjplot_paired_ttest(x = paste0(cond1,"_", comp, "_", trials, "_", dv), 
+                    y = paste0(cond2,"_", comp, "_", trials, "_", dv), sub_col_name = "subIDs", x_lab = "Condition", y_lab = y_lab, cond_labs = cond_labs, plot_title = plot_title, main_data = main_df, alternative = hypothesis_dir, save_out = FALSE)
+ii = ii +1
+  }
+  i = i +1
+}
+ordered_p = p[c(1,4,2,5,3,6)]
+tt = ttheme_minimal()
+tt$core$fg_params <- list(fontface=matrix(c(2),
+                          ncol=1,nrow=3,byrow=TRUE))
+  table_row_name <- tableGrob(c("Full Vs. Half", "Full Vs. 99%", "Full vs. 90%"),  theme= tt)
+  lg = grid.arrange(
+       arrangeGrob(ordered_p[[1]], top= textGrob("N1",hjust = -.4,
+                                                 gp=gpar(fontsize = 14, fontface = "bold"))),
+       ordered_p[[3]],
+       ordered_p[[5]])
+  rg = grid.arrange(
+    arrangeGrob(ordered_p[[2]], top= textGrob("P3 Diff.",hjust = .15, 
+                                              gp=gpar(fontsize = 14,fontface = "bold"))), 
+    ordered_p[[4]],
+    ordered_p[[6]])
+  
+  ggsave(paste0('MeanAmps_',task,'.png'),arrangeGrob(cbind(table_row_name,lg,rg, size = "last")), height = 8, width = 6, dpi = 400)
+```
+
+```{r}
+# SME comparisons
+dv = "SME"
+comp_all = c("N1","P3")
+cond1 = "full"
+cond2_all = c("odds","x99","x90")
+trials_all = c("all", "rare_frequent")
+cond_labs = c("Full","Half", "99% Var.","90% Var.")
+hypothesis_dirs = c("l","l") # we expect SME to be less for full condition for both components
+p = list()
+i = 1
+for (j in comp_all){
+  comp = j
+  trials = trials_all[i]
+  hypothesis_dir = hypothesis_dirs[i]
+  ii = 1
+  for (jj in cond2_all){
+    cond2  = jj
+    cond_labs = c(cond1_lab, cond2_lab[ii])
+plot_title = paste0(comp,"_",cond1,"_vs_", cond2)
+p[[(i-1)*3 + ii]] <- vjplot_paired_ttest(x = paste0(cond1,"_", comp, "_", trials, "_", dv), 
+                    y = paste0(cond2,"_", comp, "_", trials, "_", dv), sub_col_name = "subIDs", x_lab = "Condition", y_lab = dv, cond_labs = cond_labs, plot_title = plot_title, main_data = main_df, alternative = hypothesis_dir, save_out = FALSE)
+ii = ii +1
+  }
+  i = i +1
+}
+ordered_p = p[c(1,4,2,5,3,6)]
+tt = ttheme_minimal()
+tt$core$fg_params <- list(fontface=matrix(c(2),
+                          ncol=1,nrow=3,byrow=TRUE))
+  table_row_name <- tableGrob(c("Full Vs. Half", "Full Vs. 99%", "Full vs. 90%"),  theme= tt)
+  lg = grid.arrange(
+       arrangeGrob(ordered_p[[1]], top= textGrob("N1",hjust = -.4,
+                                                 gp=gpar(fontsize = 14, fontface = "bold"))),
+       ordered_p[[3]],
+       ordered_p[[5]])
+  rg = grid.arrange(
+    arrangeGrob(ordered_p[[2]], top= textGrob("P3 Diff.",hjust = .15, 
+                                              gp=gpar(fontsize = 14,
+                                                      fontface = "bold"))), 
+    ordered_p[[4]],
+    ordered_p[[6]])
+  
+  ggsave(paste0('SMEs_',task,'.png'),
+         arrangeGrob(cbind(table_row_name,lg,rg, size = "last")),
+         height = 8, width = 6, dpi = 400)
+```
+
+```{r}
+comp_all = c("N1","P3")
+conditions = c("full","odds","x99","x90")
+trials = c("all", "rare_frequent")
+conditions_labels = c("Full","Half","99% Var.","90% Var.")
+
+p = list()
+i = 1
+for (j in comp_all){
+  ii = 1
+  for (jj in conditions) {
+  dv1 = paste(jj,j,trials[i],'mean_amp','odds',sep = '_')
+  dv2 = paste(jj,j,trials[i],'mean_amp','evens',sep = '_')
+  x = main_df[[dv1]]
+y = main_df[[dv2]]
+x_label = c("Odd Trials (z-score)" )
+y_label = c("Even Trials (z-score)"  )
+p[[(i-1)*4 + ii]] = vjpscatter(x = x, y = y, x_label = x_label , 
+           y_label = y_label, SB = TRUE)
+ii = ii+1
+  }
+  i = i + 1
+}
+#just reordering so that when grid.arrange is called the plots are in the correct order
+ordered_p = p[c(1,5,2,6,3,7,4,8)]
+tt = ttheme_minimal()
+tt$core$fg_params <- list(fontface=matrix(c(2),
+                          ncol=1,nrow=4,byrow=TRUE))
+  table_row_name <- tableGrob(c("Full Dimensionality", "Half Dimensionality", "99% Variance", "90% Variance"),  theme= tt)
+  
+  lg = grid.arrange(
+       arrangeGrob(ordered_p[[1]], 
+       top= textGrob("N1",hjust = -.4,
+       gp=gpar(fontsize = 14, fontface = "bold"))),
+       ordered_p[[3]],
+       ordered_p[[5]],
+       ordered_p[[7]], nrow = 4)
+  
+  rg = grid.arrange(
+    arrangeGrob(ordered_p[[2]], 
+                top= textGrob("P3 Diff.",hjust = .15, 
+                gp=gpar(fontsize = 14,fontface = "bold"))), 
+    ordered_p[[4]],
+    ordered_p[[6]],
+    ordered_p[[8]], nrow = 4)
+  
+  ggsave(paste0('Reliabilities_',task,'.png'),
+         arrangeGrob(cbind(table_row_name,
+                           lg,
+                           rg, 
+                           size = "last")),
+         height = 8, width = 8, dpi = 400)
+#ggsave('Reliabilities.png',do.call(grid.arrange,c(ordered_p,ncol = 2,nrow = 4)), height = 10, width = 8, dpi = 400)
+```
+
+```{r}
+#t-test to compare perc. var.  of mixed ICs between conditions
+# only need one column because component doesn't matter
+cond2_all = c("odds","99","90")
+# SME comparisons
+dv = "% var mixed"
+cond_labs = c("Full","Half", "99% Var.","90% Var.")
+hypothesis_dir = "g" # we expect full to be less than reduced
+p = list()
+i = 1
+for (j in cond2_all){
+    cond2  = j
+    cond_labs = c(cond1_lab, cond2_lab[i])
+plot_title = paste0(comp,"_",cond1,"_vs_", cond2)
+p[[i]] <- vjplot_paired_ttest(x = paste0(dv,' ',cond1), 
+                    y = paste0(dv,' ',cond2), sub_col_name = "subIDs", x_lab = "Condition", y_lab = dv, cond_labs = cond_labs, plot_title = plot_title, main_data = main_df, alternative = hypothesis_dir, save_out = FALSE, font_mltplyr = 1.1)
+i = i+1
+  }
+tt = ttheme_minimal()
+tt$core$fg_params <- list(fontface=matrix(c(2),
+                          ncol=1,nrow=3,byrow=TRUE)) # this makes row labels bold (2=bold)
+  table_row_name <- tableGrob(c("Full Vs. Half", "Full Vs. 99%", "Full vs. 90%"),  theme= tt)
+  lg = grid.arrange(p[[1]],
+       p[[2]],
+       p[[3]], ncol = 1, nrow = 3)
+  
+  ggsave(paste0('perc_var_',task,'.png'),
+         arrangeGrob(cbind(table_row_name,lg,size = "last")),
+         height = 8, width = 6, dpi = 400)
+```
+
+```{r}
+#mediation
+library(mediation)
+sims = 10000
+mediation_res = NULL
+#N1 full vs. 90 mean amp
+res<-mediate_bin_IV(Y0 = "full_N1_all_mean_amp",
+               Y1 = "x90_N1_all_mean_amp",
+               M0 = "% var mixed full",
+               M1 = "% var mixed 90",
+               wide_df = main_df,
+               sims = sims)
+mediation_res<-cbind("N1 full vs. 90 mean amp",pub_ready_stats(res))
+
+#N1 full vs. half SME
+res<-mediate_bin_IV(Y0 = "full_N1_all_SME",
+               Y1 = "odds_N1_all_SME",
+               M0 = "% var mixed full",
+               M1 = "% var mixed odds",
+               wide_df = main_df,
+               sims = sims)
+mediation_res<-rbind(mediation_res,cbind("N1 full vs. half SME",pub_ready_stats(res)))
+
+#P3 diff. full vs. half
+res<-mediate_bin_IV(Y0 = "full_P3_rare_frequent_SME",
+               Y1 = "odds_P3_rare_frequent_SME",
+               M0 = "% var mixed full",
+               M1 = "% var mixed odds",
+               wide_df = main_df,
+               sims = sims)
+mediation_res<-rbind(mediation_res,cbind("P3 full vs. half SME",pub_ready_stats(res)))
+mediation_res
+```
+

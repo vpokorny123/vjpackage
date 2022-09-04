@@ -1,0 +1,77 @@
+"0","bfnull = lmBF(formula = near90 ~ LogMAR, data = odss_data)
+bfnull
+"
+"1","Bayes factor analysis
+--------------
+"
+"1","[1] LogMAR"
+"1",""
+"1"," : "
+"1",""
+"1","0.1832484"
+"1",""
+"1"," ±"
+"1",""
+"1","0"
+"1",""
+"1","%
+"
+"1","
+Against denominator:
+"
+"1"," "
+"1"," "
+"1","Intercept only"
+"1"," "
+"1","
+"
+"1","---
+Bayes factor type: "
+"1",""
+"1","BFlinearModel"
+"1",""
+"1",", "
+"1",""
+"1","JZS"
+"1",""
+"1","
+
+"
+"0","bfgrp = lmBF(formula = near90 ~ grp, data = odss_data)"
+"0","bfgrp/bfnull"
+"1","Bayes factor analysis
+--------------
+"
+"1","[1] grp"
+"1",""
+"1"," : "
+"1",""
+"1","102.5551"
+"1",""
+"1"," ±"
+"1",""
+"1","0.01"
+"1",""
+"1","%
+"
+"1","
+Against denominator:
+"
+"1"," "
+"1"," "
+"1","near90 ~ LogMAR"
+"1"," "
+"1","
+"
+"1","---
+Bayes factor type: "
+"1",""
+"1","BFlinearModel"
+"1",""
+"1",", "
+"1",""
+"1","JZS"
+"1",""
+"1","
+
+"

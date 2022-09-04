@@ -1,0 +1,54 @@
+---
+title: "Untitled"
+output: html_document
+date: "2022-07-25"
+---
+
+```{r}
+set.seed(1)
+#fungible(R.X = matrix(c(1,.5,.5,.5,1,.5,.5,.5,1),3,3), 
+      #   rxy = c(.5,.5,.5),
+      #   r.yhata.yhatb = .99,
+      #   sets = 10)
+
+n_preds = 10
+pred_cors = .5
+cor_vari = .01
+rxy = .5
+rxy_vari = .1
+
+#maybe this is better way of making matrices
+R.X = diag(1,n_preds)
+noise = rnorm(length(R.X[lower.tri(R.X)]),sd = cor_vari)
+R.X[lower.tri(R.X)] = pred_cors + noise
+R.X = t(R.X)
+R.X[lower.tri(R.X)] = pred_cors + noise
+
+
+## vector of predictor-criterion correlations 
+rxy <- rxy + rnorm(n_preds,sd = rxy_vari)
+ 
+## OLS standardized regression coefficients
+b <- solve(R.X) %*% rxy
+ 
+## Coefficient of determination (Rsq)
+OLSRSQ <- t(b) %*% R.X %*% b
+
+## theta controls the correlation between 
+## yhatb: predicted criterion scores using OLS coefficients
+## yhata: predicted criterion scores using alternate weights
+theta <- .01
+
+## desired correlation between yhata and yhatb 
+r.yhata.yhatb <- sqrt( 1 - (theta)/OLSRSQ)
+
+## number of returned sets of fungible weight vectors
+Nsets <- 1000
+
+output <- fungible(R.X, rxy, r.yhata.yhatb, sets = Nsets)
+diag(output$cov.a)
+#diag(var(output$a))
+
+
+```
+

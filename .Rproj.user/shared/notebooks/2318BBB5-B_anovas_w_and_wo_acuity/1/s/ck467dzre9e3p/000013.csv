@@ -1,0 +1,6 @@
+"0","library(data.table)"
+"0","odss_data<-as.data.frame(fread('/Users/pokor076/My Drive/NF-ODSS Behavior Revision/paper_data.csv'))"
+"0","#just grab important stuff"
+"0","vars_i_want <- c(""grp"",""Age"",""IQ"",""Gender"",""LogMAR"",""BPRS Total"",""SGI Total"", ""SPQ Total"",""M"",""ID"",""offset"",""width"",""goodfit"")"
+"0","odss_main<-odss_data[vars_i_want]"
+"0",""

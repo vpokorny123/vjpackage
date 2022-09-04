@@ -1,0 +1,29 @@
+"0","mod<-afex::aov_ez(data = odss_goodbois
+    , dv = 'M'
+    , id = 'ID'
+    , between = c('grp','IQbin')
+    , type = 2
+    , factorize = TRUE)
+"
+"2","Converting to factor: grp, IQbin
+"
+"2","Contrasts set to contr.sum for the following variables: grp, IQbin
+"
+"0","vjpackage::pub_ready_stats(mod)"
+"1","    "
+"1"," [,1]       "
+"1"," [,2]                            "
+"1","
+[1,]"
+"1"," ""grp""      "
+"1"," ""F(4,119)=2.75, p=0.03, η²=.085"""
+"1","
+[2,]"
+"1"," ""IQbin""    "
+"1"," ""F(1,119)=0.57, p=0.45, η²=.005"""
+"1","
+[3,]"
+"1"," ""grp:IQbin"""
+"1"," ""F(4,119)=0.24, p=0.91, η²=.008"""
+"1","
+"

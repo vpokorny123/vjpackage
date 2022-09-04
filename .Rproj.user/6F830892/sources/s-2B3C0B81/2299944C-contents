@@ -1,0 +1,18 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+set.seed(50)
+x <- data.frame(a = c(rnorm(100,2), rnorm(100,1),rnorm(100,0)),
+                b = rep(c("A", "B", "C"), each = 100))
+#x
+
+mean(tapply(x$a, x$b, mean))
+
+summary(lm(a ~ b, x, contrasts = list(b = contr.sum)))
+summary(lm(a ~ b, x))
+anova(lm(a ~ b, x))
+
+```

@@ -1,0 +1,2 @@
+"0","text(log(items2facs), avg_indeterm,labels = q_name, cex = .7)"
+"0","plot(log(com_sum), avg_indeterm,ylab = '',xlab = 'Summed Communality/# of Factors',pch = '')"

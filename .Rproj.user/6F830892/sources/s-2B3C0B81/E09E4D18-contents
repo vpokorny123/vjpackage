@@ -1,0 +1,73 @@
+---
+title: "Untitled"
+output: html_document
+date: '2022-04-17'
+---
+
+```{r}
+library(fungible)
+library(psych)
+PF16_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/16PF/data_cleaned_rev_scored.csv',data.table = FALSE)
+BIG5_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/BIG5/data_cleaned_rev_scored.csv',data.table = FALSE)
+SD3_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/SD3/data_cleaned_rev_scored.csv',data.table = FALSE)
+MPQ_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/MPQ/data_cleaned_rev_scored.csv',data.table = FALSE)
+PID5_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/PID5/data_cleaned_rev_scored.csv',data.table = FALSE)
+```
+
+
+```{r}
+q_name = c("PF16","BIG5","SD3","MPQ","PID5")
+nfactors = c(16,5,3,11,25)
+#check out degree of communality
+items2facs<-c(ncol(PF16_comp_qs_rev)/16,
+              ncol(BIG5_comp_qs_rev)/5,
+              ncol(SD3_comp_qs_rev)/3,
+              ncol(MPQ_comp_qs_rev)/11,
+              ncol(PID5_comp_qs_rev)/25
+)
+com_sum = NULL
+avg_indeterm = NULL
+for (j in seq(1,5)) {
+  X = get(paste0(q_name[j],'_comp_qs_rev'))
+  res<-faMain(X = X, numFactors = nfactors[j], facMethod = 'fapa',rotate = 'promaxQ')
+  Fstar = res$loadings %*% res$Phi
+indeterm = sqrt(diag(t(Fstar) %*% solve(cor(X)) %*% Fstar))
+avg_indeterm[j] <- mean(indeterm)
+  com_sum[j] = sum(res$h2$h2)/nfactors[j]
+}
+```
+
+```{r}
+png('/Users/pokor076/My Drive/Multivariate/final project/Plots/Figure 3.png',width = 1500, height = 1200, res = 170, pointsize = 15)
+par(mfrow = c(1,2))
+plot(items2facs, avg_indeterm, ylab = 'Average Indeterminacy', xlab = '# of Items/# of Factors', pch = '',xlim = c(0,20))
+text(items2facs, avg_indeterm,labels = q_name, cex = .7)
+cor_res<-cor.test(items2facs,avg_indeterm)
+lm_res<-lm(avg_indeterm ~ items2facs)
+abline(lm_res$coefficients)
+text(mean(items2facs)+sd(items2facs), mean(avg_indeterm)-sd(avg_indeterm),paste0("r^2 = ",round(cor_res$estimate^2,2)),cex = 1.1)
+plot(com_sum, avg_indeterm,ylab = '',xlab = 'Summed Communality/# of Factors',pch = '',xlim = c(3,6))
+text(com_sum, avg_indeterm,labels = q_name,cex = .7)
+cor_res<-cor.test(com_sum,avg_indeterm)
+lm_res<-lm(avg_indeterm ~ com_sum)
+abline(lm_res$coefficients)
+text(mean(com_sum)+sd(com_sum), mean(avg_indeterm)-sd(avg_indeterm),bquote(paste0("r^2=",round(cor_res$estimate^2,2))),cex = 1.1)
+
+```
+
+```{r}
+# just messing with log scaling here
+# doesn't seem to change much
+png('/Users/pokor076/My Drive/Multivariate/final project/Plots/Figure 3 log.png',width = 1500, height = 1200, res = 170, pointsize = 15)
+par(mfrow = c(1,2))
+plot(log(items2facs), avg_indeterm, ylab = 'Average Indeterminacy', xlab = '# of Items/# of Factors', pch = '')
+text(log(items2facs), avg_indeterm,labels = q_name, cex = .7)
+plot(log(com_sum), avg_indeterm,ylab = '',xlab = 'Summed Communality/# of Factors',pch = '')
+text(log(com_sum), avg_indeterm,labels = q_name,cex = .7)
+cor
+```
+
+
+
+
+

@@ -1,0 +1,8 @@
+"0","library(fungible)"
+"0","library(psych)"
+"0","PF16_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/16PF/data_cleaned_rev_scored.csv',data.table = FALSE)"
+"0","BIG5_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/BIG5/data_cleaned_rev_scored.csv',data.table = FALSE)"
+"0","SD3_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/SD3/data_cleaned_rev_scored.csv',data.table = FALSE)"
+"0","MPQ_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/MPQ/data_cleaned_rev_scored.csv',data.table = FALSE)"
+"0","PID5_comp_qs_rev<-data.table::fread('/Users/pokor076/My Drive/Multivariate/final project/datasets/PID5/data_cleaned_rev_scored.csv',data.table = FALSE)"
+"0",""

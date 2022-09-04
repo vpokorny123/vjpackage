@@ -1,0 +1,107 @@
+make_demo_table<-function(data_frame){
+for (j in colnames(data_frame)) {
+  if (j == "grp" | j == "group" | j == "Group") {
+    group_var_name = j
+    freqs = table(data_frame[group_var_name])
+    final_table = t(as.data.frame(paste0(names(freqs)," n=(",unname(freqs),")")))
+    final_table = unname(final_table)
+    final_table = cbind('Variable',final_table,'Statistic','Post Hoc Contrasts')
+    }
+
+  else if (j == "Gender" | j == "gender" | j == "gndr" | j== "Sex" | j == "sex") {
+    print("calculating percent female: assuming lowest number is male and highest number is female (e.g. 0 = male, 1 = female). YOU NEED TO CHECK TO MAKE SURE THAT IS RIGHT. If it isn't right then recode so it is right lol")
+    freqs = table(as.factor(data_frame[[group_var_name]]),as.factor(data_frame[[j]]))
+    res = chisq.test(freqs)
+    es = effectsize::effectsize(res)
+    res_pretty = paste0(greekLetters::greeks("Chi^2"),"(",res$parameter,")=",round(res$statistic,digits = 3),
+                        ', p=', round(res$p.value, digits = 3),
+                        ', Cramer',"'",'s V=',round(es$Cramers_v, digits = 2))
+    posthoc_res = chisq.posthoc.test::chisq.posthoc.test(freqs)
+    #browser()
+    posthoc_pvals = posthoc_res[posthoc_res["Value"] == 'p values',]
+    if (any(posthoc_pvals["1"]<.05)){
+      print("haven't coded this part yet")
+    }
+    else{
+      posthoc_string = " "
+    }
+    perc = round(freqs[,2]/(freqs[,1]+freqs[,2])*100)
+    final_row = unname(cbind("Percent Female",t(unname(perc)),res_pretty,posthoc_string))
+    final_table = as.data.frame(rbind(final_table,final_row))
+    rownames(final_table)<- NULL
+  }
+  else{
+  means = aggregate(get(j) ~ get(group_var_name),data = data_frame, mean, drop = FALSE)
+  means = round(means[,2],digits = 2)
+  stds = aggregate(get(j) ~ get(group_var_name),data = data_frame, sd, drop = FALSE)
+  stds = round(stds[,2],digits = 2)
+  final_row = paste0(means," (",stds,")")
+  aov_res = aov(get(j)~ get(group_var_name), data =data_frame)
+  es = effectsize::effectsize(aov_res)
+  #browser()
+  aov_sum = unlist(summary(aov_res))
+  pval = round(aov_sum["Pr(>F)1"],digits = 2)
+  ifelse(pval==0, pval<-"<.001",pval<-paste0('=',pval))
+  stats = paste0("F(",aov_sum[1], ",", aov_sum[2],")=",round(aov_sum["F value1"],digits = 2),
+                 ", p", pval,
+                 ", ",greekLetters::greeks("eta^2"),"=",round(es$Eta2,digits = 2))
+  final_final_row = as.data.frame(unname(cbind(j,t(final_row),stats," ")))
+  final_table = rbind(final_table,final_final_row)
+}
+}
+return(final_table)
+}
+
+#correction should either be none, hf or gg
+pub_ready_stats<-function(x) {
+  #this is for afex aov_ez
+  output = NULL
+  if (class(x)[1]=="afex_aov") {
+    anov_table<-x[["anova_table"]]
+    pest <- afex::nice(x, 'pes')
+    rownames(pest)<- pest$Effect
+    for (j in rownames(anov_table)) {
+    fstat = round(anov_table[j,"F"], digits = 2)
+    pval = round(anov_table[j,"Pr(>F)"], digits = 2)
+    ifelse(pval==0, pval<-"<.001",pval<-paste0('=',pval))
+    df1 = round(anov_table[j,"num Df"],digits =2)
+    df2 = round(anov_table[j,"den Df"],digits =2)
+    p_eta <- pest[j,'pes']
+    pub_ready = paste0('F(',df1,',',df2,')=',fstat,', p',pval,', ', greekLetters::greeks("eta^2"), '=', p_eta)
+    pub_ready = unname(cbind(j,pub_ready))
+    output = unname(rbind(output,pub_ready))
+    }
+  }
+  if (all(class(x)==c("psych","fa"))){
+    #x$chi is the emprically derived which is recommended when normal theory fails (e.g. non-positive definite matrix)
+    #x$STATISTIC is what we want to report unless something funky's goin on
+    chi<-round(x$STATISTIC,digits = 2)
+    ifelse(round(x$PVAL,digits = 2)==0, pval<-"<.001",pval<-paste0('=',round(x$PVAL,digits = 2)))
+    chi_rep<- paste0(greekLetters::greeks("chi^2"),'(',x$dof,')=',chi,', p',pval)
+    x$CFI<-((x$null.chisq-x$null.dof)-
+                    (x$STATISTIC-x$dof))/(x$null.chisq-x$null.dof)
+    other_fits<-paste0(chi_rep,', TLI=',round(x$TLI,digits=2),
+                       ', CFI=', round(x$CFI,digits=2),
+                       ', RMSEA=', round(x$RMSEA,digits=2)[1])
+    output = other_fits
+  }
+  if (class(x)[1] == "htest"){
+    r = round(x$estimate,digits = 2)
+    df = x$parameter
+    ifelse(round(x$p.value,digits = 2)==0, pval-"<.001",pval<-paste0('=',round(x$p.value,digits = 3)))
+    output<-paste0("r(",df,")=",r,", p",pval)
+  }
+
+return(output)
+}
+
+vjpscatter<- function(x,y,x_label,y_label) {
+  plot(x,y, xlab = x_label, ylab = y_label)
+  abline(lm(y ~ x), col = "blue")
+  res<-cor.test(x,y,use = 'pairwise.complete.obs')
+  text(0,mean(y)-(2*sd(y)),
+       paste0('r =', as.character(round(res$estimate,digits = 3)),
+              ', \n p=',round(res$p.value,digits = 3)))
+}
+
+

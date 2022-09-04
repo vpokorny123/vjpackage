@@ -1,0 +1,28 @@
+{
+    "id": "2299944C",
+    "path": null,
+    "project_path": null,
+    "type": "r_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": true,
+    "created": 1657810000480.0,
+    "source_on_save": false,
+    "relative_order": 5,
+    "properties": {
+        "tempName": "Untitled1",
+        "chunk_output_type": "inline",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "6,11",
+        "scrollLine": "3"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 140171754991160,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1657811150749,
+    "read_only": false,
+    "read_only_alternatives": []
+}
